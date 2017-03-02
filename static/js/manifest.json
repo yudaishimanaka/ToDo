@@ -2,11 +2,10 @@
   "name": "PushDemo",
   "short_name": "PushDemo",
   "icons": [{
-        "src": "../img/default.jpg",
+        "src": "ics_logo_512x512.png",
         "sizes": "512x512"
       }],
-  "start_url": "./",
+  "start_url": "/",
   "display": "standalone",
   "gcm_sender_id": "#159345165660"
 }
-
