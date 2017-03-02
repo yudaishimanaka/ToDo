@@ -1,0 +1,12 @@
+{
+  "name": "PushDemo",
+  "short_name": "PushDemo",
+  "icons": [{
+        "src": "../img/default.jpg",
+        "sizes": "512x512"
+      }],
+  "start_url": "./",
+  "display": "standalone",
+  "gcm_sender_id": "#159345165660"
+}
+
