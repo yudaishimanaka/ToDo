@@ -7,7 +7,7 @@ email_validator = lepl.apps.rfc3696.Email()
 mysql = MySQL()
 app = Flask(__name__)
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'gurutaminn1009'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'donarudo'
 app.config['MYSQL_DATABASE_DB'] = 'todo'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
