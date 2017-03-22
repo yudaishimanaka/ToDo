@@ -10,6 +10,7 @@ app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'donarudo'
 app.config['MYSQL_DATABASE_DB'] = 'todo'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+#app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql.init_app(app)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
@@ -98,12 +99,15 @@ def taskadd():
         name = session['username']
         title = request.json['title']
         contents = request.json['contents']
+        level = request.json['level']
+        period = request.json['period']
+        period = period.split(" - ")
         conn = mysql.connect()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Task WHERE username = '" + name + "'AND title ='" + title + "'")
         data = cursor.fetchone()
         if data is None:
-            cursor.execute('INSERT INTO Task (username,title,contents) VALUES(%s,%s,%s)', [name, title, contents])
+            cursor.execute('INSERT INTO Task (username,title,contents,startp,endp,level) VALUES(%s,%s,%s,%s,%s,%s)', [name, title, contents,period[0],period[1],level])
             conn.commit()
             return "タスクを登録しました!タスク一覧から確認してください！"
         else:
@@ -133,6 +137,49 @@ def remove():
         conn.commit()
         return "タスクは削除されました"
 
+
+@app.route("/calendar")
+def calendar():
+    if 'username' not in session:
+        return redirect(url_for('top'))
+    else:
+        return render_template("calendar.html")
+
+
+@app.route("/tasklist", methods=['GET'])
+def tasklist():
+    from flask import jsonify, session
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'")
+    data = cursor.fetchall()
+    response = []
+    for value in range(len(data)):
+        start = data[value][3]
+        end = data[value][4]
+        level = data[value][5]
+        if level == "最重要":
+            bgcolor = "#dd4b39"
+            bodercolor = "#dd4b39"
+        elif level == "重要":
+            bgcolor = "#f39c12"
+            bodercolor = "#f39c12"
+        else:
+            bgcolor = "#3c8dbc"
+            bodercolor = "#3c8dbc"
+
+        start = start.split("/")
+        end = end.split("/")
+        response.append({
+            "title" : data[value][1],
+            "start": start[2] + "-" + start[0] + "-" + start[1],
+            "end": end[2] + "-" + end[0] + "-" + end[1],
+            "backgroundColor": bgcolor,
+            "borderColor": bodercolor
+        })
+
+    cursor.close()
+    return jsonify(response)
 
 if __name__ == "__main__":
     app.run(debug=True)

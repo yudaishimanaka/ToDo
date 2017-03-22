@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>ToDo</title>
+    <title>僕だけのToDo管理</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.6 -->
@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="static/plugins/select2/select2.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="static/dist/css/AdminLTE.min.css">
+    <link rel="shortcut icon" href="static/img/favicon.ico">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="static/dist/css/skins/_all-skins.min.css">
@@ -44,22 +45,19 @@
             <nav class="navbar navbar-static-top" role="navigation">
 
                 <!-- メニュー項目 -->
-                <!-- 小さくなった時に消す -->
-                <div class="collapse navbar-collapse" id="navbar-collapse">
-
                     <!-- サイドバー制御 -->
                     <a href="" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                         <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
                     </a>
-
                     <!-- 右に寄せるメニュ :navbar-rightとかもあるが、マージが無い -->
                     <div class="navbar-custom-menu">
                         <ul class="nav navbar-nav">
                             <li><a href="logout"><i class="fa fa-sign-out"></i>ログアウト</a></li>
                         </ul>
                     </div>
-
-                </div>
             </nav>
         </header><!-- end header -->
 
@@ -69,10 +67,11 @@
             <section class="sidebar" style="height: auto;">
                 <div class="user-panel">
                     <div class="pull-left img">
-                        <img src="static/img/user.jpg" class="img-circle" alt="User Image">
+                        <img src="static/img/yohane2.jpg" class="img-circle" alt="User Image">
                     </div>
-                    <div class="pull-left info">
+                    <div class="info" align="right" style="padding-left: 90px;">
                         <p id="name">{{ session.username }}</p>
+
                     </div>
                 </div>
                 <ul class="sidebar-menu">
@@ -91,6 +90,12 @@
                         <a href="/add">
                             <i class="fa fa-tasks"></i>
                             <span>新規追加</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/calendar">
+                            <i class="fa fa-calendar"></i>
+                            <span>タスクカレンダー</span>
                         </a>
                     </li>
                 </ul>

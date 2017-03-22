@@ -7,7 +7,6 @@ $(function (){
                         var title = $("#title"+i).text();
                         var contents = $("#contents"+i).text();
                         var name = $("#name").text();
-                        $(del[i]).remove();
                         $.ajax({
                             type:'POST',
                             url:'/remove',
@@ -22,9 +21,17 @@ $(function (){
                                     url:'/request',
                                     contentType:'application/json',
                                     success: function(response){
-                                        for(var i = 0; i < response.length; i++){
-                                            $("#tasklist").html(
-                                                "<div class='box box-primary'><div class='box-header with-border'><label class='box-title' id='title"+i+"'>"+response[i][1]+"</label><div class='box-tools pull-right'><button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-times'></i></button></div></div><div class='box-body' id='contents"+i+"'>"+response[i][2]+"</div></div>");
+                                        $("#tasklist").empty();
+                                        for(var y = 0; y < response.length; y++){
+                                            if(response[y][5] == "最重要"){
+                                                var level = "box-danger";
+                                            }else if(response[y][5] == "重要"){
+                                                var level = "box-warning";
+                                            }else{
+                                                var level = "box-primary";
+                                            }
+                                            $("#tasklist").append(
+                                                "<div class='box "+level+"'><div class='box-header with-border'><label class='box-title' id='title"+y+"'>"+response[y][1]+"</label><div class='box-tools pull-right'>"+response[y][3]+" - "+response[y][4]+"<button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-times'></i></button></div></div><div class='box-body' id='contents"+y+"'>"+response[y][2]+"</div></div>");
                                         }
                                     },
                                     error: function(response){
@@ -47,8 +54,15 @@ $(document).ready(function(){
             contentType:'application/json',
             success: function(response){
                 for(var i = 0; i < response.length; i++){
+                    if(response[i][5] == "最重要"){
+                        var level = "box-danger";
+                    }else if(response[i][5] == "重要"){
+                        var level = "box-warning";
+                    }else{
+                        var level = "box-primary";
+                    }
                     $("#tasklist").append(
-                        "<div class='box box-primary'><div class='box-header with-border'><label class='box-title' id='title"+i+"'>"+response[i][1]+"</label><div class='box-tools pull-right'><button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-times'></i></button></div></div><div class='box-body' id='contents"+i+"'>"+response[i][2]+"</div></div>");
+                        "<div class='box "+level+"'><div class='box-header with-border'><label class='box-title' id='title"+i+"'>"+response[i][1]+"</label><div class='box-tools pull-right'>"+response[i][3]+" - "+response[i][4]+"<button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-times'></i></button></div></div><div class='box-body' id='contents"+i+"'>"+response[i][2]+"</div></div>");
                 }
             },
             error: function(response){

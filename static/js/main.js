@@ -35,7 +35,9 @@ $(function (){
                     type:'POST',
                     url:'/taskadd',
                     data: JSON.stringify({"title":$("#title").val(),
-                                       "contents":$("#contents").val()
+                                       "contents":$("#contents").val(),
+                                       "period":$("#reservation").val(),
+                                       "level":$("#level").val()
                                         }),
                     contentType:'application/json',
                     success: function(response){
