@@ -37,7 +37,8 @@ $(function (){
                     data: JSON.stringify({"title":$("#title").val(),
                                        "contents":$("#contents").val(),
                                        "period":$("#reservation").val(),
-                                       "level":$("#level").val()
+                                       "level":$("#level").val(),
+                                       "status": "on"
                                         }),
                     contentType:'application/json',
                     success: function(response){

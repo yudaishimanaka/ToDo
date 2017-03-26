@@ -102,16 +102,17 @@ def taskadd():
         level = request.json['level']
         period = request.json['period']
         period = period.split(" - ")
+        status = request.json["status"]
         conn = mysql.connect()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Task WHERE username = '" + name + "'AND title ='" + title + "'")
         data = cursor.fetchone()
         if data is None:
-            cursor.execute('INSERT INTO Task (username,title,contents,startp,endp,level) VALUES(%s,%s,%s,%s,%s,%s)', [name, title, contents,period[0],period[1],level])
+            cursor.execute('INSERT INTO Task (username,title,contents,startp,endp,level,status) VALUES(%s,%s,%s,%s,%s,%s,%s)', [name, title, contents, period[0], period[1], level, status])
             conn.commit()
             return "タスクを登録しました!タスク一覧から確認してください！"
         else:
-            return "すでに同じタスクが登録されていますs"
+            return "タスク一覧または完了済みタスク一覧に同じタイトルのタスクが存在します"
 
 
 @app.route("/request", methods=['GET'])
@@ -119,23 +120,24 @@ def request():
     from flask import jsonify, session
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'")
+    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'AND status = 'on'")
     data = cursor.fetchall()
     cursor.close()
     return jsonify(data)
 
 
-@app.route("/remove", methods=['POST'])
-def remove():
+@app.route("/update", methods=['POST'])
+def update():
     from flask import request, jsonify
     if request.method == 'POST':
         name = request.json['name']
         title = request.json['title']
+        status = request.json["status"]
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM Task WHERE username ='" + name + "'AND title ='" + title + "'")
+        cursor.execute("UPDATE Task SET status ='"+ status +"'WHERE username ='" + name + "'AND title ='" + title + "'")
         conn.commit()
-        return "タスクは削除されました"
+        return "タスクは完了しました"
 
 
 @app.route("/calendar")
@@ -177,9 +179,40 @@ def tasklist():
             "backgroundColor": bgcolor,
             "borderColor": bodercolor
         })
-
     cursor.close()
     return jsonify(response)
+
+
+@app.route("/completed")
+def completed():
+    if 'username' not in session:
+        return redirect(url_for('top'))
+    else:
+        return render_template("complete.html")
+
+
+@app.route("/complist", methods=['GET'])
+def complist():
+    from flask import jsonify, session
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'AND status = 'off'")
+    data = cursor.fetchall()
+    return jsonify(data)
+
+
+@app.route("/remove", methods=['POST'])
+def remove():
+    from flask import request, jsonify
+    if request.method == 'POST':
+        name = request.json['name']
+        title = request.json['title']
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Task WHERE username ='" + name + "'AND title ='" + title + "'")
+        conn.commit()
+        return "タスクは削除されました"
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -9,7 +9,7 @@ $(function (){
                         var name = $("#name").text();
                         $.ajax({
                             type:'POST',
-                            url:'/update',
+                            url:'/remove',
                             data: JSON.stringify({"title": title,
                                                "contents": contents,
                                                "name": name,
@@ -19,7 +19,7 @@ $(function (){
                             success: function(response){
                                 $.ajax({
                                     type:'GET',
-                                    url:'/request',
+                                    url:'/complist',
                                     contentType:'application/json',
                                     success: function(response){
                                         $("#tasklist").empty();
@@ -32,7 +32,7 @@ $(function (){
                                                 var level = "box-primary";
                                             }
                                             $("#tasklist").append(
-                                                "<div class='box "+level+"'><div class='box-header with-border'><label class='box-title' id='title"+y+"'>"+response[y][1]+"</label><div class='box-tools pull-right'>"+response[y][3]+" - "+response[y][4]+"<button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-check'> 完了</i></button></div></div><div class='box-body' id='contents"+y+"'>"+response[y][2]+"</div></div>");
+                                                "<div class='box "+level+"'><div class='box-header with-border'><label class='box-title' id='title"+y+"'>"+response[y][1]+"</label><div class='box-tools pull-right'>"+response[y][3]+" - "+response[y][4]+"<button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-times'> 削除</i></button></div></div><div class='box-body' id='contents"+y+"'>"+response[y][2]+"</div></div>");
                                         }
                                     },
                                     error: function(response){
@@ -51,7 +51,7 @@ $(function (){
 $(document).ready(function(){
     $.ajax({
             type:'GET',
-            url:'/request',
+            url:'/complist',
             contentType:'application/json',
             success: function(response){
                 for(var i = 0; i < response.length; i++){
@@ -63,7 +63,7 @@ $(document).ready(function(){
                         var level = "box-primary";
                     }
                     $("#tasklist").append(
-                        "<div class='box "+level+"'><div class='box-header with-border'><label class='box-title' id='title"+i+"'>"+response[i][1]+"</label><div class='box-tools pull-right'>"+response[i][3]+" - "+response[i][4]+"<button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-check'> 完了</i></button></div></div><div class='box-body' id='contents"+i+"'>"+response[i][2]+"</div></div>");
+                        "<div class='box "+level+"'><div class='box-header with-border'><label class='box-title' id='title"+i+"'>"+response[i][1]+"</label><div class='box-tools pull-right'>"+response[i][3]+" - "+response[i][4]+"<button id='remove' type='button' class='btn btn-box-tool' data-widget='remove'><i class='fa fa-times'> 削除</i></button></div></div><div class='box-body' id='contents"+i+"'>"+response[i][2]+"</div></div>");
                 }
             },
             error: function(response){
