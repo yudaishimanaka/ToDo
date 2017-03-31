@@ -1,11 +1,12 @@
 {
-  "name": "PushDemo",
-  "short_name": "PushDemo",
+  "name": "todomaneger",
+  "short_name": "todo",
   "icons": [{
-        "src": "ics_logo_512x512.png",
-        "sizes": "512x512"
-      }],
-  "start_url": "/",
+    "src": "img/yohane.png",
+    "sizes": "256x256",
+    "type": "image/png"
+  }],
+  "start_url": "https://todo.ydsteins.tk",
   "display": "standalone",
-  "gcm_sender_id": "#159345165660"
+  "gcm_sender_id": "1038781552067"
 }

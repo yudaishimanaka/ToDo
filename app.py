@@ -1,11 +1,13 @@
 from flask import Flask, request, render_template, url_for, session, jsonify, redirect, json, make_response
 from flaskext.mysql import MySQL
+from flask_sslify import *
 import lepl.apps.rfc3696
 import json
 
 email_validator = lepl.apps.rfc3696.Email()
 mysql = MySQL()
 app = Flask(__name__)
+sslify = SSLify(app)
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'donarudo'
 app.config['MYSQL_DATABASE_DB'] = 'todo'
@@ -153,7 +155,7 @@ def tasklist():
     from flask import jsonify, session
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'")
+    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'AND status = 'on'")
     data = cursor.fetchall()
     response = []
     for value in range(len(data)):
@@ -212,6 +214,14 @@ def remove():
         cursor.execute("DELETE FROM Task WHERE username ='" + name + "'AND title ='" + title + "'")
         conn.commit()
         return "タスクは削除されました"
+
+
+@app.route("/setting")
+def setting():
+    if 'username' not in session:
+        return redirect(url_for('top'))
+    else:
+        return render_template("setting.html")
 
 
 if __name__ == "__main__":
