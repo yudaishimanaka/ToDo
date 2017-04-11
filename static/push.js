@@ -10,7 +10,7 @@ self.addEventListener('push', function(event) {
             })
   }
   var icon = 'img/yohane.png';
-  var url = 'http://localhost:5000/login';
+  var url = 'https://todo.ydsteins.tk/login';
   event.waitUntil(
     getEndpoint().then(function(endpoint) {
         return fetch("http://localhost:5000/fetch", {

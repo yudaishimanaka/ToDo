@@ -29,7 +29,7 @@ for i in data:
         "data": {
             "title": "test",
             "body": "test",
-            "url": "http://localhost:5000/login"
+            "url": "https://todo.ydsteins.tk/login"
         },
         "to": id
         }

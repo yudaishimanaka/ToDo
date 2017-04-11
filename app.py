@@ -277,7 +277,7 @@ def fetch():
             data = {
                 "title": "僕だけのToDo管理",
                 "body": "未完了タスクが" + str(len(push_data)) + "件あります!,ログインして確認しましょう!",
-                "url": "localhost:5000/login"
+                "url": "https://todo.ydsteins.tk/login"
             }
             return jsonify(data)
 
@@ -285,7 +285,7 @@ def fetch():
             data = {
                 "title": "僕だけのToDo管理",
                 "body": "まずはタスクを登録してみましょう!",
-                "url": "http://localhost:5000/login"
+                "url": "https://todo.ydsteins.tk/login"
             }
             return jsonify(data)
 
