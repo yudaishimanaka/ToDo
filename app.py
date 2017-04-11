@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 from flask import Flask, request, render_template, url_for, session, jsonify, redirect, json, make_response
 from flaskext.mysql import MySQL
 from flask_sslify import *
@@ -9,10 +10,9 @@ mysql = MySQL()
 app = Flask(__name__)
 sslify = SSLify(app)
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'donarudo'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'gurutaminn1009'
 app.config['MYSQL_DATABASE_DB'] = 'todo'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-#app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql.init_app(app)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
@@ -137,7 +137,7 @@ def update():
         status = request.json["status"]
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("UPDATE Task SET status ='"+ status +"'WHERE username ='" + name + "'AND title ='" + title + "'")
+        cursor.execute("UPDATE Task SET status ='" + status + "'WHERE username ='" + name + "'AND title ='" + title + "'")
         conn.commit()
         return "タスクは完了しました"
 
@@ -175,7 +175,7 @@ def tasklist():
         start = start.split("/")
         end = end.split("/")
         response.append({
-            "title" : data[value][1],
+            "title": data[value][1],
             "start": start[2] + "-" + start[0] + "-" + start[1],
             "end": end[2] + "-" + end[0] + "-" + end[1],
             "backgroundColor": bgcolor,
@@ -223,6 +223,71 @@ def setting():
     else:
         return render_template("setting.html")
 
+
+@app.route("/register_endpoint", methods=['POST'])
+def register_endpoint():
+    from flask import request, jsonify
+    if request.method == 'POST':
+        name = request.json['name']
+        state = str(request.json['state'])
+        endpoint = request.json['endpoint']
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE User SET push_endpoint ='" + endpoint + "',push_state ='" + state + "' WHERE username ='" + name + "'")
+        conn.commit()
+        return "OK"
+
+
+@app.route("/user_state", methods=['GET'])
+def user_state():
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM User WHERE username = '" + session['username'] + "'")
+    data = cursor.fetchall()
+    return jsonify(data)
+
+
+@app.route("/update_state", methods=['POST'])
+def update_state():
+    from flask import request, jsonify
+    if request.method == 'POST':
+        name = request.json['name']
+        state = str(request.json['state'])
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE User SET push_state ='" + state + "' WHERE username ='" + name + "'")
+        conn.commit()
+        return "OK"
+
+
+@app.route("/fetch", methods=['POST'])
+def fetch():
+    from flask import request, jsonify
+    if request.method == 'POST':
+        endpoint = request.json['end_point']
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM User WHERE push_endpoint = '" + endpoint + "' AND push_state = 'True'")
+        data = cursor.fetchall()
+        print(data[0][0])
+        cursor.execute("SELECT * FROM Task WHERE username = '" + data[0][0] + "' AND status = 'on'")
+        push_data = cursor.fetchall()
+        print(len(push_data))
+        if len(push_data) != 0:
+            data = {
+                "title": "僕だけのToDo管理",
+                "body": "未完了タスクが" + str(len(push_data)) + "件あります!,ログインして確認しましょう!",
+                "url": "localhost:5000/login"
+            }
+            return jsonify(data)
+
+        else:
+            data = {
+                "title": "僕だけのToDo管理",
+                "body": "まずはタスクを登録してみましょう!",
+                "url": "http://localhost:5000/login"
+            }
+            return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True)

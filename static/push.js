@@ -2,48 +2,57 @@
 
 self.addEventListener('push', function(event) {
   console.log('Received a push message', event);
-
-  // サンプルでは固定のメッセージを通知するようにしています。
-  // 動的にユーザーごとにメッセージを変えたい場合は、
-  // ペイロードの暗号化を行うか、FetchAPIで動的に情報を取得する必要があります。
-  var title = '僕だけのToDo管理';
-  var body = '4件の未完了タスクがあります。ログインして確認しましょう';
+  function getEndpoint() {
+    return self.registration.pushManager.getSubscription().then(function(subscription) {
+                if (subscription) {
+                    return subscription.endpoint
+                }
+            })
+  }
   var icon = 'img/yohane.png';
-  var tag = 'simple-push-demo-notification-tag';
-  var url = 'localhost:5000/login';
-
+  var url = 'http://localhost:5000/login';
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: icon,
-      tag: tag,
-      data: {
-        url: url
-      }
+    getEndpoint().then(function(endpoint) {
+        return fetch("http://localhost:5000/fetch", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                end_point: endpoint
+            })
+        }).then(function(response) {
+            if (response.status === 200) {
+                return response.json()
+            }
+        }).then(function(response) {
+            return self.registration.showNotification(response.title, {
+                icon: icon,
+                body: response.body,
+                data: {
+                    url: url
+                }
+            })
+        }).catch(err => {
+            return;
+        })
     })
   );
 });
-
 self.addEventListener('notificationclick', function(event) {
-  console.log('On notification click: ', event.notification.tag);
-  event.notification.close();
+  event.notification.close()
 
- var notoficationURL = "/"
+  var url = "/"
   if (event.notification.data.url) {
-    notoficationURL = event.notification.data.url
+    url = event.notification.data.url
   }
 
-  event.waitUntil(clients.matchAll({
-    type: 'window'
-  }).then(function(clientList) {
-    for (var i = 0; i < clientList.length; i++) {
-      var client = clientList[i];
-      if (client.url === '/' && 'focus' in client) {
-        return client.focus();
+  event.waitUntil(
+    clients.matchAll({type: 'window'}).then(function() {
+      if(clients.openWindow) {
+        return clients.openWindow(url)
       }
-    }
-    if (clients.openWindow) {
-      return clients.openWindow(notoficationURL);
-    }
-  }));
-});
+    })
+  )
+})

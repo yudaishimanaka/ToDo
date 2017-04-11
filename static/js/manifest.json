@@ -6,7 +6,7 @@
     "sizes": "256x256",
     "type": "image/png"
   }],
-  "start_url": "https://todo.ydsteins.tk",
+  "start_url": "/",
   "display": "standalone",
   "gcm_sender_id": "1038781552067"
 }
