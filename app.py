@@ -4,10 +4,13 @@ from flaskext.mysql import MySQL
 from flask_sslify import *
 import lepl.apps.rfc3696
 import json
+import os
+from passlib.hash import pbkdf2_sha256
 
+tmp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 email_validator = lepl.apps.rfc3696.Email()
 mysql = MySQL()
-app = Flask(__name__)
+app = Flask(__name__, template_folder=tmp_dir)
 sslify = SSLify(app)
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'gurutaminn1009'
@@ -28,7 +31,7 @@ def register():
     if request.method == 'POST':
         name = request.json['name']
         email = request.json['email']
-        password = request.json['pass']
+        password = pbkdf2_sha256.hash(request.json['pass'])
         if len(name) != 0 and len(email) != 0 and len(password) != 0:
             if email_validator(email):
                 conn = mysql.connect()
@@ -36,7 +39,8 @@ def register():
                 cursor.execute("SELECT * FROM User WHERE username = '" + name + "'")
                 data = cursor.fetchone()
                 if data is None:
-                    cursor.execute('INSERT INTO User(username,email,password) VALUES(%s,%s,%s)', [name, email, password])
+                    cursor.execute('INSERT INTO User(username,email,password) VALUES(%s,%s,%s)',
+                                   [name, email, password])
                     conn.commit()
                     return "登録できました！"
                 else:
@@ -75,15 +79,20 @@ def auth():
         password = request.form['password']
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM User WHERE username = '" + name + "'AND password = '" + password + "'")
+        cursor.execute("SELECT * FROM User WHERE username = '" + name + "'")
         data = cursor.fetchone()
         if data is None:
-            error = "正しいユーザー名またはパスワードを入力してください"
+            error = "登録されていないユーザーです"
             session['msg'] = error
             return redirect(url_for('login'))
         else:
-            session['username'] = name
-            return redirect(url_for('index'))
+            if pbkdf2_sha256.verify(password, data[2]) is True:
+                session['username'] = name
+                return redirect(url_for('index'))
+            else:
+                error = "ユーザーネームまたはパスワードが間違っています"
+                session['msg'] = error
+                return redirect(url_for('login'))
 
 
 @app.route("/add")
@@ -110,7 +119,8 @@ def taskadd():
         cursor.execute("SELECT * FROM Task WHERE username = '" + name + "'AND title ='" + title + "'")
         data = cursor.fetchone()
         if data is None:
-            cursor.execute('INSERT INTO Task (username,title,contents,startp,endp,level,status) VALUES(%s,%s,%s,%s,%s,%s,%s)', [name, title, contents, period[0], period[1], level, status])
+            cursor.execute('INSERT INTO Task (username,title,contents,startp,endp,level,status) '
+                           'VALUES(%s,%s,%s,%s,%s,%s,%s)', [name, title, contents, period[0], period[1], level, status])
             conn.commit()
             return "タスクを登録しました!タスク一覧から確認してください！"
         else:
@@ -137,7 +147,8 @@ def update():
         status = request.json["status"]
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("UPDATE Task SET status ='" + status + "'WHERE username ='" + name + "'AND title ='" + title + "'")
+        cursor.execute("UPDATE "
+                       "Task SET status ='" + status + "'WHERE username ='" + name + "'AND title ='" + title + "'")
         conn.commit()
         return "タスクは完了しました"
 
@@ -233,7 +244,8 @@ def register_endpoint():
         endpoint = request.json['endpoint']
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("UPDATE User SET push_endpoint ='" + endpoint + "',push_state ='" + state + "' WHERE username ='" + name + "'")
+        cursor.execute("UPDATE User SET "
+                       "push_endpoint ='" + endpoint + "',push_state ='" + state + "' WHERE username ='" + name + "'")
         conn.commit()
         return "OK"
 
