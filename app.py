@@ -7,6 +7,7 @@ import json
 import os
 from passlib.hash import pbkdf2_sha256
 from jinja2 import utils
+from datetime import datetime
 
 tmp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 email_validator = lepl.apps.rfc3696.Email()
@@ -289,24 +290,38 @@ def fetch():
         data = cursor.fetchall()
         cursor.execute("SELECT * FROM Task WHERE username = '" + data[0][0] + "' AND status = 'on'")
         push_data = cursor.fetchall()
-        action = ""
+        today_do = []
+        today_do_str = ""
+        any_do = []
+        any_do_str = ""
+        d = datetime.today()
+        year = int(d.year)
+        month = int(d.month)
+        day = int(d.day)
+        date = datetime(year, month, day)
         for i in range(len(push_data)):
-            action += "・" + push_data[i][1] + "\n"
+            date2 = push_data[i][4].split("/")
+            date2 = datetime(int(date2[2]), int(date2[0]), int(date2[1]))
+            if date2 == date:
+                today_do.append("・" + push_data[i][1] + "\n")
+                today_do_str += "・" + push_data[i][1] + "\n"
+            else:
+                any_do.append("・" + push_data[i][1] + "\n")
+                any_do_str += "・" + push_data[i][1] + "\n"
 
         if len(push_data) != 0:
             data = {
-                "title": "僕だけのToDo管理",
-                "body": "未完了タスクが" + str(len(push_data)) + "件あります!,ログインして確認しましょう!\n",
-                "url": "https://todo.ydsteins.tk/login",
-                "action": action
+                "title": "ToDo",
+                "body": "[今日が締め切りのタスク" + str(len(today_do)) + "件]\n" +
+                        today_do_str + "[締め切り外のタスク" + str(len(any_do)) + "件]\n" + any_do_str,
+                "url": "https://todo.ydsteins.tk/login"
             }
             return jsonify(data)
         else:
             data = {
-                "title": "僕だけのToDo管理",
+                "title": "ToDo",
                 "body": "まずはタスクを登録してみましょう!",
-                "url": "https://todo.ydsteins.tk/login",
-                "action": ""
+                "url": "https://todo.ydsteins.tk/login"
             }
             return jsonify(data)
 

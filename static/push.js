@@ -30,7 +30,7 @@ self.addEventListener('push', function(event) {
             console.log(response.action)
             return self.registration.showNotification(response.title, {
                 icon: icon,
-                body: response.body+response.action,
+                body: response.body,
                 actions: [{
                     "action": "setting",
                     "title": "設定"
