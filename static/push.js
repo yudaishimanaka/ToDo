@@ -10,7 +10,7 @@ self.addEventListener('push', function(event) {
             })
   }
   var icon = 'img/yohane.png';
-  var url = 'https://todo.ydsteins.tk/login';
+  var url = 'http://localhost:5000/index';
   event.waitUntil(
     getEndpoint().then(function(endpoint) {
         return fetch("http://localhost:5000/fetch", {
@@ -27,12 +27,18 @@ self.addEventListener('push', function(event) {
                 return response.json()
             }
         }).then(function(response) {
+            console.log(response.action)
             return self.registration.showNotification(response.title, {
                 icon: icon,
-                body: response.body,
+                body: response.body+response.action,
+                actions: [{
+                    "action": "setting",
+                    "title": "設定"
+                }],
                 data: {
                     url: url
-                }
+                },
+                vibrate: [200, 100, 200, 100, 200, 100, 200]
             })
         }).catch(err => {
             return;
@@ -42,7 +48,9 @@ self.addEventListener('push', function(event) {
 });
 self.addEventListener('notificationclick', function(event) {
   event.notification.close()
-
+  if (event.action === 'setting'){
+    clients.openWindow('/setting');
+  }
   var url = "/"
   if (event.notification.data.url) {
     url = event.notification.data.url

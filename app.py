@@ -6,6 +6,7 @@ import lepl.apps.rfc3696
 import json
 import os
 from passlib.hash import pbkdf2_sha256
+from jinja2 import utils
 
 tmp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 email_validator = lepl.apps.rfc3696.Email()
@@ -29,8 +30,8 @@ def top():
 def register():
     from flask import request
     if request.method == 'POST':
-        name = request.json['name']
-        email = request.json['email']
+        name = str(utils.escape(request.json['name']))
+        email = str(utils.escape(request.json['email']))
         password = pbkdf2_sha256.hash(request.json['pass'])
         if len(name) != 0 and len(email) != 0 and len(password) != 0:
             if email_validator(email):
@@ -75,7 +76,7 @@ def index():
 def auth():
     from flask import request
     if request.method == 'POST':
-        name = request.form['name']
+        name = str(utils.escape(request.form['name']))
         password = request.form['password']
         conn = mysql.connect()
         cursor = conn.cursor()
@@ -107,9 +108,9 @@ def add():
 def taskadd():
     from flask import request
     if request.method == 'POST':
-        name = session['username']
-        title = request.json['title']
-        contents = request.json['contents']
+        name = str(utils.escape(session['username']))
+        title = str(utils.escape(request.json['title']))
+        contents = str(utils.escape(request.json['contents']))
         level = request.json['level']
         period = request.json['period']
         period = period.split(" - ")
@@ -130,9 +131,10 @@ def taskadd():
 @app.route("/request", methods=['GET'])
 def request():
     from flask import jsonify, session
+    name = str(utils.escape(session['username']))
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'AND status = 'on'")
+    cursor.execute("SELECT * FROM Task WHERE username = '" + name + "'AND status = 'on'")
     data = cursor.fetchall()
     cursor.close()
     return jsonify(data)
@@ -142,8 +144,8 @@ def request():
 def update():
     from flask import request, jsonify
     if request.method == 'POST':
-        name = request.json['name']
-        title = request.json['title']
+        name = str(utils.escape(request.json['name']))
+        title = str(utils.escape(request.json['title']))
         status = request.json["status"]
         conn = mysql.connect()
         cursor = conn.cursor()
@@ -164,9 +166,10 @@ def calendar():
 @app.route("/tasklist", methods=['GET'])
 def tasklist():
     from flask import jsonify, session
+    name = str(utils.escape(session['username']))
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'AND status = 'on'")
+    cursor.execute("SELECT * FROM Task WHERE username = '" + name + "'AND status = 'on'")
     data = cursor.fetchall()
     response = []
     for value in range(len(data)):
@@ -207,9 +210,10 @@ def completed():
 @app.route("/complist", methods=['GET'])
 def complist():
     from flask import jsonify, session
+    name = str(utils.escape(session['username']))
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Task WHERE username = '" + session['username'] + "'AND status = 'off'")
+    cursor.execute("SELECT * FROM Task WHERE username = '" + name + "'AND status = 'off'")
     data = cursor.fetchall()
     return jsonify(data)
 
@@ -218,8 +222,9 @@ def complist():
 def remove():
     from flask import request, jsonify
     if request.method == 'POST':
-        name = request.json['name']
-        title = request.json['title']
+        name = str(utils.escape(request.json['name']))
+        title = str(utils.escape(request.json['title']))
+        print(title)
         conn = mysql.connect()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM Task WHERE username ='" + name + "'AND title ='" + title + "'")
@@ -239,7 +244,7 @@ def setting():
 def register_endpoint():
     from flask import request, jsonify
     if request.method == 'POST':
-        name = request.json['name']
+        name = str(utils.escape(request.json['name']))
         state = str(request.json['state'])
         endpoint = request.json['endpoint']
         conn = mysql.connect()
@@ -252,9 +257,10 @@ def register_endpoint():
 
 @app.route("/user_state", methods=['GET'])
 def user_state():
+    name = str(utils.escape(session['username']))
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM User WHERE username = '" + session['username'] + "'")
+    cursor.execute("SELECT * FROM User WHERE username = '" + name + "'")
     data = cursor.fetchall()
     return jsonify(data)
 
@@ -263,7 +269,7 @@ def user_state():
 def update_state():
     from flask import request, jsonify
     if request.method == 'POST':
-        name = request.json['name']
+        name = str(utils.escape(request.json['name']))
         state = str(request.json['state'])
         conn = mysql.connect()
         cursor = conn.cursor()
@@ -281,23 +287,26 @@ def fetch():
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM User WHERE push_endpoint = '" + endpoint + "' AND push_state = 'True'")
         data = cursor.fetchall()
-        print(data[0][0])
         cursor.execute("SELECT * FROM Task WHERE username = '" + data[0][0] + "' AND status = 'on'")
         push_data = cursor.fetchall()
-        print(len(push_data))
+        action = ""
+        for i in range(len(push_data)):
+            action += "・" + push_data[i][1] + "\n"
+
         if len(push_data) != 0:
             data = {
                 "title": "僕だけのToDo管理",
-                "body": "未完了タスクが" + str(len(push_data)) + "件あります!,ログインして確認しましょう!",
-                "url": "https://todo.ydsteins.tk/login"
+                "body": "未完了タスクが" + str(len(push_data)) + "件あります!,ログインして確認しましょう!\n",
+                "url": "https://todo.ydsteins.tk/login",
+                "action": action
             }
             return jsonify(data)
-
         else:
             data = {
                 "title": "僕だけのToDo管理",
                 "body": "まずはタスクを登録してみましょう!",
-                "url": "https://todo.ydsteins.tk/login"
+                "url": "https://todo.ydsteins.tk/login",
+                "action": ""
             }
             return jsonify(data)
 
