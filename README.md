@@ -36,4 +36,4 @@ pip install -r requirements.txt
 python app.py
 ```
 
-http://localhost:5000でアクセス
+http://localhost:5000 でアクセス
