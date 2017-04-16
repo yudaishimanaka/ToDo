@@ -3,6 +3,9 @@ PythonのFlaskというWebフレームワークを用いいて書かれたToDo�
 
 ## 環境
 Python3.~
+pip
+git
+がインストールされている環境
 
 ## ダウンロード
 ```bash
