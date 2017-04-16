@@ -1,0 +1,6 @@
+DEBUG=True
+MYSQL_DATABASE_USER='your mysql root user'
+MYSQL_DATABASE_PASSWORD='your mysql root password'
+MYSQL_DATABASE_DB='todo'
+MYSQL_DATABASE_HOST='localhost'
+API_KEY='your FCM or GCM secret key(server key)'

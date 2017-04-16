@@ -6,12 +6,9 @@ import requests
 
 mysql = MySQL()
 app = Flask(__name__)
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'gurutaminn1009'
-app.config['MYSQL_DATABASE_DB'] = 'todo'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config.from_pyfile('my.cfg')
 mysql.init_app(app)
-API_KEY = 'AAAA8dw0lcM:APA91bEP44rMh8Dnqp89LBhcmObcz4PCHSs5yxnoKZn99VqnWLXXWUDwl1kdEQPbmuWw6X_lckUgsUeSOL67gvuq8jVK_xXmHGXtQAEryFvakpe1MrhxGORScApCJ0i_KFmm4UOBWI4z'
+API_KEY = app.config['API_KEY']
 url = 'https://fcm.googleapis.com/fcm/send'
 
 conn = mysql.connect()

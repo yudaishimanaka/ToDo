@@ -14,10 +14,7 @@ email_validator = lepl.apps.rfc3696.Email()
 mysql = MySQL()
 app = Flask(__name__, template_folder=tmp_dir)
 sslify = SSLify(app)
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'gurutaminn1009'
-app.config['MYSQL_DATABASE_DB'] = 'todo'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config.from_pyfile('my.cfg')
 mysql.init_app(app)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
@@ -326,4 +323,4 @@ def fetch():
             return jsonify(data)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=app.config['DEBUG'])
