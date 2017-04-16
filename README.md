@@ -2,10 +2,7 @@
 PythonのFlaskというWebフレームワークを用いいて書かれたToDo管理
 
 ## 環境
-Python3.~
-pip
-git
-がインストールされている環境
+Python3.~,pip,gitがインストールされている環境
 
 ## ダウンロード
 ```bash
